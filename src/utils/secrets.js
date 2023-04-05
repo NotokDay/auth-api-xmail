@@ -1,4 +1,5 @@
-require('dotenv/config');
+require('dotenv').config();
+
 
 const { logger } = require('./logger');
 
@@ -18,12 +19,12 @@ const requiredCredentials = [
     'JWT_SECRET_KEY'
 ];
 
-for (const credential of requiredCredentials) {
-    if (process.env[credential] === undefined) {
-        logger.error(`Missing required crendential: ${credential}`);
-        process.exit(1);
-    }
-}
+// for (const credential of requiredCredentials) {
+//     if (process.env[credential] === undefined) {
+//         logger.error(`Missing required credential: ${credential}`);
+//         process.exit(1);
+//     }
+// }
 
 module.exports = {
     DB_HOST,

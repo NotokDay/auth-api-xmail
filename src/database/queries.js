@@ -11,22 +11,37 @@ CREATE TABLE IF NOT EXISTS users (
     lastname VARCHAR(50) NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
+    is_verified INT,
     created_on TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
 )
 `;
 
+const createTableOTPsQuery = `
+CREATE TABLE IF NOT EXISTS otps (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    otp VARCHAR(6) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NOT NULL
+);`
+
 const createNewUser = `
-INSERT INTO users VALUES(null, ?, ?, ?, ?, NOW())
+INSERT INTO users VALUES(null, ?, ?, ?, ?, ?, NOW())
 `;
 
 const findUserByEmail = `
 SELECT * FROM users WHERE email = ?
 `;
 
+const updateIsVerifiedQuery = 'UPDATE users SET is_verified = true WHERE email = ?';
+
+
 module.exports = {
     createDB,
     dropDB,
     createTableUSers,
     createNewUser,
-    findUserByEmail
+    findUserByEmail,
+    updateIsVerified: updateIsVerifiedQuery,
+    createTableOTPsQuery
 };
