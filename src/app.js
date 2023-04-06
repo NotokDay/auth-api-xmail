@@ -143,18 +143,20 @@ app.post("/api/auth/changepassword", async (req, res) => {
 
 app.post("/api/auth/resetpassword", async (req, res) => {
     try {
-        const { token, otp, newPassword, confirmPassword } = req.body;
-        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY)
+        
+        const { email, otp, newPassword, confirmPassword } = req.body;
 
-        const getUserFromDB = "SELECT * FROM users WHERE id = ?"
-        db.query(getUserFromDB, [decoded.id], (err, user) => {
-            if(err){
-                return res.status(500).send({
-                    status: "error", 
-                    message: err.message
-                })
-            }
-            const query = "SELECT * FROM otps WHERE email = ? AND otp = ? AND expires_at > NOW()";
+        const getUser = "SELECT * FROM users WHERE email = ?"
+        const user = await new Promise((resolve, reject) => {
+            db.query(getUser, [email], (err, result) => {
+                if (err) {
+                    reject(err)
+                }
+                resolve(result)
+            });
+        });
+
+        const query = "SELECT * FROM otps WHERE email = ? AND otp = ? AND expires_at > NOW()";
             db.query(query, [user[0].email, otp], (err, result) => {
                 if (err) {
                     return res.status(500).send({
@@ -165,15 +167,17 @@ app.post("/api/auth/resetpassword", async (req, res) => {
                 //otp is still ok
                 if (result.length > 0) {
                     if(newPassword != confirmPassword){
-                        return res.send({
+                        console.log(newPassword, confirmPassword)
+                        return res.status(400).send({
                             status: "error",
                             message: "Passwords do not match."
                         })
                     }
                     //change user's password
+                    console.log('we are here')
                     const hashedPassword = hashPassword(newPassword.trim())
                     const changePassword = "UPDATE users SET password=? WHERE id=?"
-                    db.query(changePassword, [hashedPassword,decoded.id], (err, dbResForPassChange) => {
+                    db.query(changePassword, [hashedPassword,user[0].id], (err, dbResForPassChange) => {
                         if(err){
                             return res.status(500).send({
                                 status: "error",
@@ -192,15 +196,10 @@ app.post("/api/auth/resetpassword", async (req, res) => {
                         }
                         });
     
-                        const token = generateToken(decoded.id);
+                        // const token = generateToken(user[0].id);
                         return res.status(200).send({
                             status: 'success',
-                            data: {
-                                token,
-                                firstname: user[0].firstname,
-                                lastname: user[0].lastname,
-                                email: user[0].email
-                            }
+                            message: "Password reset successful"
                     });
                 })
                 } else {
@@ -210,10 +209,7 @@ app.post("/api/auth/resetpassword", async (req, res) => {
                     })
                 }
             });
-        })
-
         
-
          
 	} catch (e) {
 		if (e instanceof jwt.JsonWebTokenError) {
@@ -264,7 +260,7 @@ app.get("/api/auth/reset/:encodedEmail", async (req, res) => {
             if (err) {
                 return res.status(500).send({
                     status: "error", 
-                    message: err.message
+                    message: "Invalid link"
                 })
             } else {
                 sendEmail(dbRes[0].email, action="reset", otp) 
@@ -277,7 +273,7 @@ app.get("/api/auth/reset/:encodedEmail", async (req, res) => {
         } catch (err){
             return res.status(500).send({
                 status: "error", 
-                message: err.message
+                message: "Invalid link"
             })
         }
 	} catch (e) {

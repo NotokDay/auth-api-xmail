@@ -3,33 +3,71 @@ const { hash: hashPassword, compare: comparePassword } = require('../utils/passw
 const { generate: generateToken } = require('../utils/token');
 const { sendEmail } = require('../mailSender')
 const db = require('../config/db.config');
+const axios = require('axios');
 
-exports.signup = (req, res) => {
+
+const url = 'https://email-checker.p.rapidapi.com/verify/v1';
+
+const getEmail = async (email) => {
+    //const email = 'your_email@example.com'; // Replace this with your desired email input method
+
+    const querystring = {
+        email: email,
+    };
+
+    const headers = {
+        'X-RapidAPI-Key': 'ee007d9eddmshde6e8d7f4318d2ep170771jsn3a8e621efd10',
+        'X-RapidAPI-Host': 'email-checker.p.rapidapi.com',
+    };
+
+    try {
+        const response = await axios.get(url, { headers: headers, params: querystring });
+        console.log(response.data)
+        if(response.data.status === "valid") return 1
+        else return 0
+    } catch (error) {
+        console.log(error)
+        return 0
+    }
+};
+
+
+
+exports.signup = async (req, res) => {
     const { firstname, lastname, email, password } = req.body;
     const hashedPassword = hashPassword(password.trim());
 
     const user = new User(firstname.trim(), lastname.trim(), email.trim(), hashedPassword);
 
+    if(await getEmail(email) === 1){
     //create the user 
-    User.create(user, (err, data) => {
-        if (err) {
-            res.status(500).send({
-                status: "error",
-                message: err.message
-            });
-        } else {
-            const token = generateToken(data.id);
-            res.status(201).send({
-                status: "success",
-                data: "Verification link is sent to your email. Please check your inbox."
-            });
-        }
-    });
+        User.create(user, (err, data) => {
+            if (err) {
+                res.status(500).send({
+                    status: "error",
+                    message: err.message
+                });
+            } else {
+                    res.status(201).send({
+                        status: "success",
+                        data: "Verification link is sent to your email. Please check your inbox."
+                    });
+                    sendEmail(email)
+            }
+        });
+        return
+    }
 
-    //send email to the user
-    sendEmail(email)
+    return res.status(400).send({
+        status: "error",
+        data: "The email address is not a valid email."
+    });
     
 };
+
+
+
+
 
 exports.signin = (req, res) => {
     const { email, password } = req.body;
