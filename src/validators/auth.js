@@ -35,7 +35,6 @@ const signin = (req, res, next) => {
             .required(),
         password: Joi.string()
             .trim()
-            .pattern(new RegExp('^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[^\\w\\s])[A-Za-z\\d^\\W_]{8,}$'))
             .required()
     });
     validatorHandler(req, res, next, schema);
