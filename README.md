@@ -1,5 +1,5 @@
 # NodeJS Auth REST API example with Express, Mysql, and JWT
-
+This is an improvement to [Desirekaleba's project](https://github.com/desirekaleba/node-mysql-jwt-auth) for our [XMail project](https://github.com/NotokDay/XMail-SpamChecker).
 ## Features
 1. User can sign up
 2. User can sign in
