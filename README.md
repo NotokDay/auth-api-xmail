@@ -8,27 +8,11 @@
 
 1. `POST /api/auth/signup`: Creates a new user
 2. `POST /api/auth/signin`: Logs in a user
+3. `GET /api/auth/verify/:token`: Verifies user's email address
+4. `POST /api/auth/changepassword`: Changes user's password using their OLD password
+5. `GET /api/auth/reset/:encodedEmail`: Sends a one-time-password to user's email
+6. `POST /api/auth/resetpassword`: Will reset user's password
 
-## Body Payload Specification
-Signup expects
-
-```js
-{
-    firstname: string,
-    lastname: string,
-    email: string,
-    password: string
-}
-```
-
-Signin expects
-
-```js
-{
-    email: string,
-    password: string
-}
-```
 ## Tools
 * NodeJS/Express: Server
 * MySQL: Storage
@@ -82,41 +66,4 @@ You can also start it in watch mode with
 
 ```sh
 npm run start:dev
-```
-
-## Folder structure
-```sh
-.
-├── README.md
-├── package-lock.json
-├── package.json
-└── src
-    ├── app.js
-    ├── config
-    │   ├── db.config.init.js
-    │   └── db.config.js
-    ├── controllers
-    │   └── auth.controller.js
-    ├── database
-    │   ├── queries.js
-    │   └── scripts
-    │       ├── dbDown.js
-    │       ├── dbUp.js
-    │       └── tablesUp.js
-    ├── index.js
-    ├── middlewares
-    │   ├── asyncHandler.js
-    │   ├── checkEmail.js
-    │   └── validatorHandler.js
-    ├── models
-    │   └── user.model.js
-    ├── routes
-    │   └── auth.route.js
-    ├── utils
-    │   ├── logger.js
-    │   ├── password.js
-    │   ├── secrets.js
-    │   └── token.js
-    └── validators
-        └── auth.js
 ```
